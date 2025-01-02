@@ -128,7 +128,26 @@ pub fn get_section_string(config: Config, key: String) -> Result(String, Nil) {
   }
 }
 
-pub fn select_string(config: Config, path: String) -> Result(String, Nil) {
+/// Select a nested string value from a nested Config section,
+/// using a path expression (e.g. "a:b:c")
+/// 
+pub fn select_string(config: RootConfig, path: String) -> Result(String, Nil) {
+  case config {
+    RootConfig(data) -> {
+      let keys = string.split(path, ":")
+      select_string_r(Section(data), keys)
+    }
+    Empty -> Error(Nil)
+  }
+}
+
+/// Select a nested string value from a nested Config section,
+/// using a path expression (e.g. "a:b:c")
+/// 
+pub fn select_section_string(
+  config: Config,
+  path: String,
+) -> Result(String, Nil) {
   let keys = string.split(path, ":")
   select_string_r(config, keys)
 }

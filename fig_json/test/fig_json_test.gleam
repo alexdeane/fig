@@ -26,6 +26,15 @@ pub fn hello_world_test() {
 
   let assert Ok(root_config) = fig_json.json_loader("foo.json", True)
 
+  // Direct child
   let assert Ok("b") = fig.get_string(root_config, "a")
-  let assert Error("b") = fig.get_string(root_config, "a")
+
+  // Section
+  let assert Error(Nil) = fig.get_string(root_config, "b")
+
+  // DNE
+  let assert Error(Nil) = fig.get_string(root_config, "asdadas")
+
+  // Nested
+  let assert Ok("e") = fig.select_string(root_config, "c:d")
 }
