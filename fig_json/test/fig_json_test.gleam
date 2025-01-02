@@ -1,9 +1,9 @@
-import gleam/dynamic
-import gleam/dynamic/decode
+import fig
+import fig_json
 import gleam/io
-import gleam/json
 import gleam/string
 import gleeunit
+import simplifile
 
 pub fn main() {
   gleeunit.main()
@@ -11,10 +11,21 @@ pub fn main() {
 
 // gleeunit test functions end in `_test`
 pub fn hello_world_test() {
-  let json_result = json.parse("foo.json", decode.dynamic)
+  // {
+  //    "a": "b",
+  //    "c": {
+  //        "d": "e",
+  //        "f": false
+  //    }
+  // }
+  let assert Ok(_) =
+    simplifile.write(
+      "foo.json",
+      "{     \"a\": \"b\",     \"c\": {         \"d\": \"e\",         \"f\": false     } }",
+    )
 
-  case json_result {
-    Error(decode_error) -> decode_error |> string.inspect |> io.debug
-    Ok(data) -> data |> dynamic.classify |> io.debug
-  }
+  let assert Ok(root_config) = fig_json.json_loader("foo.json", True)
+
+  let assert Ok("b") = fig.get_string(root_config, "a")
+  let assert Error("b") = fig.get_string(root_config, "a")
 }

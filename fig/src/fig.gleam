@@ -1,4 +1,5 @@
 import gleam/dict
+import gleam/dynamic.{type Dynamic}
 import gleam/list
 import gleam/otp/task
 import gleam/result
@@ -16,7 +17,7 @@ pub type RootConfig {
 }
 
 pub type Config {
-  Value(String)
+  Value(Dynamic)
   Section(data: dict.Dict(String, Config))
 }
 
@@ -91,11 +92,35 @@ pub fn add_loader(builder: ConfigBuilder, loader: ConfigLoader) -> ConfigBuilder
   ConfigBuilder([loader, ..builder.loaders])
 }
 
-pub fn get_string(config: Config, key: String) -> Result(String, Nil) {
+/// Get a top-level string cfg from a RootConfig
+/// 
+pub fn get_string(config: RootConfig, key: String) -> Result(String, Nil) {
+  case config {
+    RootConfig(data) -> {
+      case dict.get(data, key) {
+        Ok(Value(value)) ->
+          case dynamic.string(value) {
+            Ok(string) -> Ok(string)
+            Error(_) -> Error(Nil)
+          }
+        _ -> Error(Nil)
+      }
+    }
+    Empty -> Error(Nil)
+  }
+}
+
+/// Get a top-level string cfg from a Config section
+/// 
+pub fn get_section_string(config: Config, key: String) -> Result(String, Nil) {
   case config {
     Section(data) -> {
       case dict.get(data, key) {
-        Ok(Value(value)) -> Ok(value)
+        Ok(Value(value)) ->
+          case dynamic.string(value) {
+            Ok(string) -> Ok(string)
+            _ -> Error(Nil)
+          }
         _ -> Error(Nil)
       }
     }
@@ -121,6 +146,10 @@ fn select_string_r(config: Config, keys: List(String)) -> Result(String, Nil) {
         }
       }
     }
-    Value(value) -> Ok(value)
+    Value(value) ->
+      case dynamic.string(value) {
+        Ok(string) -> Ok(string)
+        _ -> Error(Nil)
+      }
   }
 }
