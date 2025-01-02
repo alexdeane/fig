@@ -1,5 +1,9 @@
+import gleam/dynamic
+import gleam/dynamic/decode
+import gleam/io
+import gleam/json
+import gleam/string
 import gleeunit
-import gleeunit/should
 
 pub fn main() {
   gleeunit.main()
@@ -7,6 +11,10 @@ pub fn main() {
 
 // gleeunit test functions end in `_test`
 pub fn hello_world_test() {
-  1
-  |> should.equal(1)
+  let json_result = json.parse("foo.json", decode.dynamic)
+
+  case json_result {
+    Error(decode_error) -> decode_error |> string.inspect |> io.debug
+    Ok(data) -> data |> dynamic.classify |> io.debug
+  }
 }
