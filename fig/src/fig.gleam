@@ -157,6 +157,16 @@ fn select_string_r(config: Config, keys: List(String)) -> Result(String, Nil) {
     Section(data) -> {
       case keys {
         [] -> Error(Nil)
+        [key] -> {
+          case dict.get(data, key) {
+            Ok(Value(value)) ->
+              case dynamic.string(value) {
+                Ok(string) -> Ok(string)
+                _ -> Error(Nil)
+              }
+            _ -> Error(Nil)
+          }
+        }
         [key, ..rest] -> {
           case dict.get(data, key) {
             Ok(Section(data)) -> select_string_r(Section(data), rest)
