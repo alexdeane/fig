@@ -1,5 +1,5 @@
 import gleam/dict
-import gleam/dynamic.{type Dynamic}
+import gleam/dynamic.{type Dynamic, dynamic}
 import gleam/list
 import gleam/otp/task
 import gleam/result
@@ -181,4 +181,37 @@ fn select_string_r(config: Config, keys: List(String)) -> Result(String, Nil) {
         _ -> Error(Nil)
       }
   }
+}
+
+pub fn from_dict(data: dict.Dict(Dynamic, Dynamic)) -> RootConfig {
+  data |> do_from_dict |> dict.from_list |> RootConfig
+}
+
+fn do_from_dict(data: dict.Dict(Dynamic, Dynamic)) -> List(#(String, Config)) {
+  data
+  |> dict.to_list
+  |> list.filter_map(fn(kvp) {
+    let #(key, value) = kvp
+
+    // Non-string keys are not supported 
+    case dynamic.string(key) {
+      Ok(key) -> {
+        case value |> dynamic.dict(dynamic, dynamic) {
+          Ok(dict) -> {
+            let value = dict |> do_from_dict |> dict.from_list |> Section
+            Ok(#(key, value))
+          }
+          Error(_) ->
+            case dynamic.string(value) {
+              Ok(value) -> {
+                let value = value |> dynamic.from |> Value
+                Ok(#(key, value))
+              }
+              Error(_) -> Error(Nil)
+            }
+        }
+      }
+      Error(_) -> Error(Nil)
+    }
+  })
 }

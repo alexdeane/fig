@@ -20,7 +20,7 @@ pub fn json_loader(path: String, required: Bool) -> fig.LoaderResult {
   case file_result {
     Ok(text) -> {
       case decode_to_dict(text) {
-        Ok(x) -> Ok(config_from_json(x))
+        Ok(x) -> Ok(fig.from_dict(x))
         Error(e) ->
           Error(fig.ParseError(
             "Error parsing JSON file: " <> path <> " " <> string.inspect(e),
@@ -44,39 +44,3 @@ pub fn json_loader(path: String, required: Bool) -> fig.LoaderResult {
 fn decode_to_dict(
   json: String,
 ) -> Result(Dict(Dynamic, Dynamic), json.DecodeError)
-
-fn config_from_json(data: Dict(Dynamic, Dynamic)) -> fig.RootConfig {
-  data |> do_config_from_json |> dict.from_list |> fig.RootConfig
-}
-
-fn do_config_from_json(
-  data: Dict(Dynamic, Dynamic),
-) -> List(#(String, fig.Config)) {
-  data
-  |> dict.to_list
-  |> list.filter_map(fn(kvp) {
-    let #(key, value) = kvp
-
-    // Non-string keys are not supported 
-    case dynamic.string(key) {
-      Ok(key) -> {
-        case value |> dynamic.dict(dynamic, dynamic) {
-          Ok(dict) -> {
-            let value =
-              dict |> do_config_from_json |> dict.from_list |> fig.Section
-            Ok(#(key, value))
-          }
-          Error(_) ->
-            case dynamic.string(value) {
-              Ok(value) -> {
-                let value = value |> dynamic.from |> fig.Value
-                Ok(#(key, value))
-              }
-              Error(_) -> Error(Nil)
-            }
-        }
-      }
-      Error(_) -> Error(Nil)
-    }
-  })
-}
