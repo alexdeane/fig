@@ -9,21 +9,7 @@ pub fn main() {
   gleeunit.main()
 }
 
-// gleeunit test functions end in `_test`
-pub fn hello_world_test() {
-  // {
-  //    "a": "b",
-  //    "c": {
-  //        "d": "e",
-  //        "f": false
-  //    }
-  // }
-  let assert Ok(_) =
-    simplifile.write(
-      "foo.json",
-      "{     \"a\": \"b\",     \"c\": {         \"d\": \"e\",         \"f\": false     } }",
-    )
-
+pub fn e2e_json_test() {
   let assert Ok(root_config) =
     fig.new()
     |> fig_json.add("foo.json", True)
@@ -40,4 +26,11 @@ pub fn hello_world_test() {
 
   // Nested
   let assert Ok("e") = fig.select_string(root_config, "c:d")
+}
+
+pub fn file_dne_test() {
+  let assert Error(fig.NotFoundError(_)) =
+    fig.new()
+    |> fig_json.add("dne.json", True)
+    |> fig.build()
 }
