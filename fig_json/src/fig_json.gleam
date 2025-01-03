@@ -1,12 +1,11 @@
 import fig
 import gleam/dict.{type Dict}
-import gleam/dynamic.{type Dynamic, dynamic}
+import gleam/dynamic.{type Dynamic}
 import gleam/json
-import gleam/list
 import gleam/string
 import simplifile.{Enoent}
 
-pub fn add_json_file(
+pub fn add(
   builder: fig.ConfigBuilder,
   path: String,
   required: Bool,
@@ -15,7 +14,7 @@ pub fn add_json_file(
   fig.add_loader(builder, json_loader)
 }
 
-pub fn json_loader(path: String, required: Bool) -> fig.LoaderResult {
+fn json_loader(path: String, required: Bool) -> fig.LoaderResult {
   let file_result = simplifile.read(path)
   case file_result {
     Ok(text) -> {

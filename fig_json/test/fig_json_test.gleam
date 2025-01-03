@@ -24,7 +24,10 @@ pub fn hello_world_test() {
       "{     \"a\": \"b\",     \"c\": {         \"d\": \"e\",         \"f\": false     } }",
     )
 
-  let assert Ok(root_config) = fig_json.json_loader("foo.json", True)
+  let assert Ok(root_config) =
+    fig.new()
+    |> fig_json.add("foo.json", True)
+    |> fig.build()
 
   // Direct child
   let assert Ok("b") = fig.get_string(root_config, "a")
