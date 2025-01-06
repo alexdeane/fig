@@ -1,9 +1,6 @@
 import fig
 import fig_json
-import gleam/io
-import gleam/string
 import gleeunit
-import simplifile
 
 pub fn main() {
   gleeunit.main()
@@ -12,7 +9,7 @@ pub fn main() {
 pub fn e2e_json_test() {
   let assert Ok(root_config) =
     fig.new()
-    |> fig_json.add("foo.json", True)
+    |> fig_json.add("test/foo.json", True)
     |> fig.build()
 
   // Direct child
@@ -29,7 +26,7 @@ pub fn e2e_json_test() {
 }
 
 pub fn file_dne_test() {
-  let assert Error(fig.NotFoundError(_)) =
+  let assert Error(fig.AggregateError([fig.NotFoundError(_)])) =
     fig.new()
     |> fig_json.add("dne.json", True)
     |> fig.build()

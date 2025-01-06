@@ -1,8 +1,6 @@
 import fig
-import gleam/dict.{type Dict}
-import gleam/dynamic.{type Dynamic}
-import gleam/json
 import gleam/string
+import jelly
 import simplifile.{Enoent}
 
 pub fn add(
@@ -18,7 +16,7 @@ fn json_loader(path: String, required: Bool) -> fig.LoaderResult {
   let file_result = simplifile.read(path)
   case file_result {
     Ok(text) -> {
-      case decode_to_dict(text) {
+      case jelly.parse_dict(text) {
         Ok(x) -> Ok(fig.from_dict(x))
         Error(e) ->
           Error(fig.ParseError(
@@ -38,8 +36,3 @@ fn json_loader(path: String, required: Bool) -> fig.LoaderResult {
       ))
   }
 }
-
-@external(erlang, "fig_json_ffi", "decode")
-fn decode_to_dict(
-  json: String,
-) -> Result(Dict(Dynamic, Dynamic), json.DecodeError)
